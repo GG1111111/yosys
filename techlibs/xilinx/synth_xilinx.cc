@@ -546,12 +546,14 @@ struct SynthXilinxPass : public ScriptPass
 				run("read_verilog -icells -lib +/xilinx/abc9_model.v");
 				std::string abc9_opts = " -box +/xilinx/abc9_xc7.box";
 				abc9_opts += stringf(" -W %d", XC7_WIRE_DELAY);
-				abc9_opts += " -nomfs";
+				bool nomfs = active_design->scratchpad_get_bool("abc9.nomfs");
+				active_design->scratchpad_set_bool("abc9.nomfs", true);
 				if (nowidelut)
 					abc9_opts += " -lut +/xilinx/abc9_xc7_nowide.lut";
 				else
 					abc9_opts += " -lut +/xilinx/abc9_xc7.lut";
 				run("abc9" + abc9_opts);
+				active_design->scratchpad_set_bool("abc9.nomfs", nomfs);
 			}
 			else {
 				if (nowidelut)
