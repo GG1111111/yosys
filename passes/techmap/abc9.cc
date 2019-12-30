@@ -958,7 +958,13 @@ struct Abc9Pass : public Pass {
 			log_abort();
 		}
 
-		script_file = design->scratchpad_get_string("abc.script");
+		script_file = design->scratchpad_get_string("abc9.script", script_file);
+		if (design->scratchpad_get_bool("abc9.debug")) {
+			cleanup = false;
+			show_tempdir = true;
+		}
+		cleanup = design->scratchpad_get_bool("abc9.nocleanup", !cleanup);
+		show_tempdir = design->scratchpad_get_bool("abc9.showtmp", show_tempdir);
 
 		for (argidx = 1; argidx < args.size(); argidx++) {
 			std::string arg = args[argidx];
