@@ -732,8 +732,6 @@ void abc_module(RTLIL::Design *design, RTLIL::Module *current_module, std::strin
 					abc_script += script_file[i];
 		} else
 			abc_script += stringf("source %s", script_file.c_str());
-	} else if (design->scratchpad.count("abc.script")) {
-		abc_script += design->scratchpad_get_string("abc.script");
 	} else if (!lut_costs.empty()) {
 		bool all_luts_cost_same = true;
 		for (int this_cost : lut_costs)
@@ -1526,9 +1524,6 @@ struct AbcPass : public Pass {
 			}
 			if (arg == "-script" && argidx+1 < args.size()) {
 				script_file = args[++argidx];
-				rewrite_filename(script_file);
-				if (!script_file.empty() && !is_absolute_path(script_file) && script_file[0] != '+')
-					script_file = std::string(pwd) + "/" + script_file;
 				continue;
 			}
 			if (arg == "-liberty" && argidx+1 < args.size()) {
@@ -1767,6 +1762,14 @@ struct AbcPass : public Pass {
 			break;
 		}
 		extra_args(args, argidx, design);
+
+		if (!script_file.empty())
+			script_file = design->scratchpad_get_string("abc.script");
+		if (!script_file.empty()) {
+			rewrite_filename(script_file);
+			if (!script_file.empty() && !is_absolute_path(script_file) && script_file[0] != '+')
+				script_file = std::string(pwd) + "/" + script_file;
+		}
 
 		if (!lut_costs.empty() && !liberty_file.empty())
 			log_cmd_error("Got -lut and -liberty! This two options are exclusive.\n");

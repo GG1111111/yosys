@@ -332,10 +332,6 @@ void abc9_module(RTLIL::Design *design, RTLIL::Module *current_module, std::stri
 					abc9_script += script_file[i];
 		} else
 			abc9_script += stringf("source %s", script_file.c_str());
-	} else if (design->scratchpad.count("abc9.script")) {
-		abc9_script += design->scratchpad_get_string("abc9.script");
-	} else if (design->scratchpad.count("abc9.scriptfile")) {
-		abc9_script += stringf("source %s", design->scratchpad_get_string("abc9.scriptfile").c_str());
 	} else if (!lut_costs.empty() || !lut_file.empty()) {
 		//bool all_luts_cost_same = true;
 		//for (int this_cost : lut_costs)
@@ -970,9 +966,6 @@ struct Abc9Pass : public Pass {
 			}
 			if (arg == "-script" && argidx+1 < args.size()) {
 				script_file = args[++argidx];
-				rewrite_filename(script_file);
-				if (!script_file.empty() && !is_absolute_path(script_file) && script_file[0] != '+')
-					script_file = std::string(pwd) + "/" + script_file;
 				continue;
 			}
 			if (arg == "-D" && argidx+1 < args.size()) {
@@ -1069,6 +1062,14 @@ struct Abc9Pass : public Pass {
 			break;
 		}
 		extra_args(args, argidx, design);
+
+		if (!script_file.empty())
+			script_file = design->scratchpad_get_string("abc.script");
+		if (!script_file.empty()) {
+			rewrite_filename(script_file);
+			if (!script_file.empty() && !is_absolute_path(script_file) && script_file[0] != '+')
+				script_file = std::string(pwd) + "/" + script_file;
+		}
 
 		// ABC expects a box file for XAIG
 		if (box_file.empty())
