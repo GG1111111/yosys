@@ -957,6 +957,9 @@ struct Abc9Pass : public Pass {
 			log_cmd_error("getcwd failed: %s\n", strerror(errno));
 			log_abort();
 		}
+
+		script_file = design->scratchpad_get_string("abc.script");
+
 		for (argidx = 1; argidx < args.size(); argidx++) {
 			std::string arg = args[argidx];
 			if (arg == "-exe" && argidx+1 < args.size()) {
@@ -1058,8 +1061,6 @@ struct Abc9Pass : public Pass {
 		}
 		extra_args(args, argidx, design);
 
-		if (!script_file.empty())
-			script_file = design->scratchpad_get_string("abc.script");
 		if (!script_file.empty()) {
 			rewrite_filename(script_file);
 			if (!script_file.empty() && !is_absolute_path(script_file) && script_file[0] != '+')
